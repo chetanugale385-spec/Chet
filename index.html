@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MY Search Engine</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: Arial, sans-serif;
+}
+body{
+    height:100vh;
+    background: linear-gradient(135deg,#667eea,#764ba2);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+.container{
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    padding:30px;
+    border-radius:15px;
+    width:90%;
+    max-width:600px;
+    text-align:center;
+    color:white;
+    box-shadow:0 8px 25px rgba(0,0,0,0.3);
+}
+h1{
+    margin-bottom:20px;
+}
+.search-box{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+input{
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    outline:none;
+    font-size:16px;
+}
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    background:#ff9800;
+    color:white;
+    transition:0.3s;
+}
+button:hover{
+    background:#e68900;
+}
+#result{
+    margin-top:15px;
+    text-align:left;
+    max-height:300px;
+    overflow-y:auto;
+}
+#result img{
+    width:100%;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+.loading{
+    text-align:center;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>MY Search Engine</h1>
+    <div class="search-box">
+        <input type="text" id="topic" placeholder="Search anything..." onkeypress="handleKey(event)">
+        <button onclick="searchInfo()">Search</button>
+    </div>
+    <div id="result"></div>
+</div>
+<script>
+function handleKey(event){
+    if(event.key === "Enter"){
+        searchInfo();
+    }
+}
+async function searchInfo(){
+    let topic = document.getElementById("topic").value.trim();
+    let resultDiv = document.getElementById("result");
+    if(topic === ""){
+        resultDiv.innerHTML = "Please enter something.";
+        return;
+    }
+    resultDiv.innerHTML = "<div class='loading'>Loading...</div>";
+    try{
+        let response = await fetch(
+            "https://en.wikipedia.org/api/rest_v1/page/summary/" 
+            + encodeURIComponent(topic)
+        );
+        if(!response.ok){
+            resultDiv.innerHTML = "No information found.";
+            return;
+        }
+        let data = await response.json();
+        let output = "";
+        if(data.thumbnail && data.thumbnail.source){
+            output += "<img src='"+data.thumbnail.source+"'>";
+        }
+        output += "<h2>"+data.title+"</h2>";
+        output += "<p>"+data.extract+"</p>";
+        resultDiv.innerHTML = output;
+    }catch(error){
+        resultDiv.innerHTML = "Internet error. Please try again.";
+    }
+}
+</script>
+</body>
+</html>
